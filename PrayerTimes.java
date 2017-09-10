@@ -1,11 +1,16 @@
-
 /**
- * The latest version
- * Jul 14, 2015
- * 
- * @author Faris_Alasmary
- * @Version : 1.8
- * */
+    @author
+          ______         _                  _
+         |  ____|       (_)           /\   | |
+         | |__ __ _ _ __ _ ___       /  \  | | __ _ ___ _ __ ___   __ _ _ __ _   _
+         |  __/ _` | '__| / __|     / /\ \ | |/ _` / __| '_ ` _ \ / _` | '__| | | |
+         | | | (_| | |  | \__ \    / ____ \| | (_| \__ \ | | | | | (_| | |  | |_| |
+         |_|  \__,_|_|  |_|___/   /_/    \_\_|\__,_|___/_| |_| |_|\__,_|_|   \__, |
+                                                                              __/ |
+                                                                             |___/
+            Email: farisalasmary@gmail.com
+            Date:  Jul 14, 2015
+*/
 
 
 import java.util.Date;
@@ -25,12 +30,9 @@ public class PrayerTimes{
 	private double IshaAngle;
 	private double GMT;
 	private int AsrL;
-	private int y; // year in gregorian date
-	private int m; // month in gregorian date
-	private int d; // day in gregorian date
-	private int Y; // year in Hijri date
-	private int M; // month in Hijri date
-	private int D; // day in Hijri date
+	private GregorianDate gregorianDate;
+	private HijriDate hijriDate;
+	
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 	public PrayerTimes(int y, int m, int d, double Lat, double Long, double GMT, String Name){
@@ -59,93 +61,87 @@ public class PrayerTimes{
 
 	 // copy constructor
 	public PrayerTimes(PrayerTimes p){
-
-		this.isUAQS    = p.isUAQS ;
-		this.Latitude  = p.Latitude;
-		this.Longitude = p.Longitude;
-		this.Dec       = p.Dec;
-		this.EqTime    = p.EqTime;
-	 	this.RefLong   = p.RefLong;
-		this.FajrAngle = p.FajrAngle;
-		this.IshaAngle = p.IshaAngle;
-	 	this.AsrL      = p.AsrL;
-	 	this.GMT       = p.GMT;
-	 	this.y         = p.y;
-	 	this.m         = p.m;
-	 	this.d         = p.d;
-	 	this.Y         = p.Y;
-	 	this.M         = p.M;
-	 	this.D         = p.D;
+		this.isUAQS        = p.isUAQS ;
+		this.Latitude      = p.Latitude;
+		this.Longitude     = p.Longitude;
+		this.Dec           = p.Dec;
+		this.EqTime        = p.EqTime;
+	 	this.RefLong       = p.RefLong;
+		this.FajrAngle     = p.FajrAngle;
+		this.IshaAngle     = p.IshaAngle;
+	 	this.AsrL          = p.AsrL;
+	 	this.GMT           = p.GMT;
+	 	this.hijriDate     = p.hijriDate;
+	 	this.gregorianDate = p.gregorianDate;
 
 	}
 
-	
 	private void initialize(int y, int m, int d, double Lat, double Long, double GMT, String Name){
 		this.setName(Name);
 		
-		this.setGregorianYear(y);
-		this.setGregorianMonth(m);
-		this.setGregorianDay(d);
-		
-		int HijriDate[] = JulianDayToHijri(GregorianToJulianDay(this.y, this.m, this.d));
-		this.setHijriYear(HijriDate[0]);
-		this.setHijriMonth(HijriDate[1]);
-		this.setHijriDay(HijriDate[2]);
+		this.setGregorianDate(new GregorianDate(y, m, d));
+		this.setHijriDate(this.gregorianDate.toHijriDate());
 		
 		this.setLongitude(Long);
 		this.setLatitude(Lat);
 		this.setGMT(GMT);
 		this.RefLong = this.GMT * 15;
-		this.SolarCoordinates(this.y, this.m, this.d);
+		this.SolarCoordinates();
 		this.UmmAlQuraSettings();
 		this.AsrInShafai();
 	}
-///////////////////////////////////////////////////////////////////////////////////////////
 
-	public String getGregorianDate(){ return String.format("%02d / %02d / %04d", this.d, this.m, this.y); }
-	public String getHijriDate()	{ return String.format("%02d / %02d / %04d", this.D, this.M, this.Y); }
-	public String getFajr()			{ return FormatHours(Fajr()); }
-	public String getShrouq()		{ return FormatHours(Shrouq()); }
-	public String getDhuhr()		{ return FormatHours(Dhuhr()); }
-	public String getAsr()			{ return FormatHours(Asr()); }
-	public String getMaghrib()		{ return FormatHours(Maghrib()); }
 
-	public String getIsha(){
-		if(isUAQS) return FormatHoursForUAQS(Isha());
-		else	   return FormatHours(Isha());
+	public GregorianDate getGregorianDate(){ 
+		return new GregorianDate(this.gregorianDate);
 	}
 	
-	public String getName()			 { return Name; }
-	public double getLatitude()	 	 { return this.Latitude; }
-	public double getLongitude()	 { return this.Longitude; }
-	public double getGMT()	    	 { return this.GMT; }
-	public int    getGregorianYear() { return this.y; }
-	public int    getGregorianMonth(){ return this.m; }
-	public int    getGregorianDay()  { return this.d; }
-	public int    getHijriYear()	 { return this.Y; }
-	public int    getHijriMonth()	 { return this.M; }
-	public int    getHijriDay()	  	 { return this.D; }
+	public HijriDate getHijriDate()	{
+		return new HijriDate(this.hijriDate);
+	}
+	
+	public String getFajr(){
+		return FormatHours(Fajr());
+	}
+	
+	public String getShrouq(){
+		return FormatHours(Shrouq());
+	}
+	
+	public String getDhuhr(){
+		return FormatHours(Dhuhr());
+	}
+	
+	public String getAsr(){
+		return FormatHours(Asr());
+	}
+	
+	public String getMaghrib(){
+		return FormatHours(Maghrib());
+	}
 
-
-	/*
-	public int[][] getPrayerTimes(){
-		
-		int PrayerTimes[][] = new int[6][2];
-
-		PrayerTimes[0] = FormatPrayerTime(Fajr());
-		PrayerTimes[1] = FormatPrayerTime(Shrouq());
-		PrayerTimes[2] = FormatPrayerTime(Dhuhr());
-		PrayerTimes[3] = FormatPrayerTime(Asr());
-		PrayerTimes[4] = FormatPrayerTime(Maghrib());
-		
+	public String getIsha(){
 		if(isUAQS)
-			PrayerTimes[5] = FormatPrayerTimeForUAQS(Isha());
+			return FormatHoursForUAQS(Isha());
 		else
-			PrayerTimes[5] = FormatPrayerTime(Isha());
-
-		return PrayerTimes;
-
-	}*/
+			return FormatHours(Isha());
+	}
+	
+	public String getName(){
+		return Name;
+	}
+	
+	public double getLatitude(){
+		return this.Latitude;
+	}
+	
+	public double getLongitude(){
+		return this.Longitude;
+	}
+	
+	public double getGMT(){
+		return this.GMT;
+	}
 	
 	public String[] getPrayerTimes(){
 		String prayers[] = new String[6];
@@ -189,73 +185,32 @@ public class PrayerTimes{
 		this.RefLong = this.GMT * 15;
 	}
 
-	public void setGregorianYear(int y){
-		if(y < 2000 || y > 99999)
-			throw new IllegalArgumentException("The Gregorian year should be at least greater than 2000 and below 99999!");
-
-		//these lines will be executed only if the previous condition is NOT correct
-		this.y = y; 
-		SolarCoordinates(this.y, this.m, this.d);
+	public void setHijriDate(HijriDate hijriDate){
+		if(hijriDate == null)
+			throw new NullPointerException("No date found!");
 		
-		int HijriDate[] = JulianDayToHijri(GregorianToJulianDay(this.y, this.m, this.d));
-		this.Y = HijriDate[0];
-		this.M = HijriDate[1];
-		this.D = HijriDate[2];
-
-	}
-
-	public void setGregorianMonth(int m){
-		if(m > 12 || m < 1)
-			throw new IllegalArgumentException("The Gregorian month should be between 1 and 12!");
-
-		//this will be executed only if the previous condition is NOT correct
-		this.m = m; 
-		SolarCoordinates(this.y, this.m, this.d);
-
-		int HijriDate[] = JulianDayToHijri(GregorianToJulianDay(this.y, this.m, this.d));
-		this.Y = HijriDate[0];
-		this.M = HijriDate[1];
-		this.D = HijriDate[2];
+		this.hijriDate = hijriDate;
+		this.gregorianDate = this.hijriDate.toGregorianDate();
+		this.update();
 		
 	}
-
-	public void setGregorianDay(int d){
-		if(d > 31 || d < 1)
-			throw new IllegalArgumentException("The Gregorian day should be between 1 and 31!");
-
-		//this will be executed only if the previous condition is NOT correct
-		this.d = d;
-		SolarCoordinates(this.y, this.m, this.d);
-		
-		int HijriDate[] = JulianDayToHijri(GregorianToJulianDay(this.y, this.m, this.d));
-		this.Y = HijriDate[0];
-		this.M = HijriDate[1];
-		this.D = HijriDate[2];
-
+	
+	// THINGS MUST BE IN UPDATE:
+	/*
+	 * 		SolarCoordinates(this.y, this.m, this.d);
+	 *      Update hijri if gregorian changed and vice versa
+	 * */
+	
+	public void setGregorianDate(GregorianDate gregorianDate){
+		if(gregorianDate == null)
+			throw new NullPointerException("No date found!");
+		this.gregorianDate = gregorianDate;
+		this.hijriDate = this.gregorianDate.toHijriDate();
+		this.update();
 	}
-
-	public void setHijriYear(int Y){
-		if(Y < 1)
-			throw new IllegalArgumentException("The Hijri year should be at least greater than 0!");
-
-		//these lines will be executed only if the previous condition is NOT correct
-		this.Y = Y; 
-	}
-
-	public void setHijriMonth(int M){
-		if(M > 12 || M < 1)
-			throw new IllegalArgumentException("The Hijri month should be between 1 and 12!");
-
-		//this will be executed only if the previous condition is NOT correct
-		this.M = M; 
-	}
-
-	public void setHijriDay(int D){
-		if(D > 30 || D < 1)
-			throw new IllegalArgumentException("The Hijri day should be between 1 and 30!");
-
-		//this will be executed only if the previous condition is NOT correct
-		this.D = D;
+	
+	private void update(){
+		SolarCoordinates();
 	}
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -363,59 +318,6 @@ public class PrayerTimes{
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-/*	
-	private int[] FormatPrayerTime(double hrs) {
-
-		// this method is to return "int[]" instead of "String" in "FormatHours()"
-		int PrayerTime[] = new int[2];
-		int hour = (int)hrs;
-		//int min = (int)Math.floor((hrs - hour) * 60);
-		int min = roundToMinute((hrs - hour) * 60);
-
-			while(min >= 60){
-				hour++;
-				min -= 60;
-			}
-		
-			if(hour > 12)
-				hour -= 12;	
-
-			PrayerTime[0] = hour;
-			PrayerTime[1] = min;
-		
-		return PrayerTime;
-
-	}
-
-	private int[] FormatPrayerTimeForUAQS(double hrs) { 
-
-		// all methods for "Isha" are to add 90 mins to "Maghrib" time to get "Isha" time according to Umm-AlQura Settings
-		int PrayerTime[] = new int[2];
-		int hour = (int)hrs;
-		//int min = (int)Math.floor((hrs - hour) * 60);
-		int min = roundToMinute((hrs - hour) * 60);
-		
-			if(this.M != 9) 
-				min += 90; // this line which I'm talking about
-			else
-				min += 120;
-
-			while(min >= 60){
-				hour++;
-				min -= 60;
-			}
-		
-			if(hour > 12)
-				hour -= 12;	
-
-			PrayerTime[0] = hour;
-			PrayerTime[1] = min;
-		
-		return PrayerTime;
-
-	}
-*/
-
 	private String FormatHours(double hrs) {
 		int hour = (int)hrs;
 		//int min = (int)Math.floor((hrs - hour) * 60);
@@ -443,13 +345,15 @@ public class PrayerTimes{
 
 	private String FormatHoursForUAQS(double hrs) {
 		
-		// all methods for "Isha" are to add 90 mins to "Maghrib" time to get "Isha" time according to Umm-AlQura Settings
+		// all methods for "Isha" are to add 90 mins to "Maghrib" time to get "Isha" time according to
+		// Umm-AlQura Settings
 		
 		int hour = (int)hrs;
   		//int min = (int)Math.floor((hrs - hour) * 60);
 		int min = roundToMinute((hrs - hour) * 60);
 		
-		if(this.M != 9) 
+		// if it is Ramadan
+		if(this.hijriDate.getMonth() != 9) 
 			min += 90; // this line which I'm talking about
 		else
 			min += 120;
@@ -500,8 +404,11 @@ public class PrayerTimes{
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-	private void SolarCoordinates(int y, int m, int d){
-
+	private void SolarCoordinates(){
+		int y = this.gregorianDate.getYear();
+		int m = this.gregorianDate.getMonth();
+		int d = this.gregorianDate.getDay();
+		
 		double D = GregorianToJulianDay(y, m, d) - 2451545.0;
 		double g = fixangle(357.529 + 0.98560028 * D);
 		double q = fixangle(280.459 + 0.98564736 * D);
@@ -515,115 +422,23 @@ public class PrayerTimes{
     
 	}
 
-///////////////////////////////////////////////////////////////////////////////////////////
-	
-	/*public double GregorianToJulianDay(int y, int m, int d) {
-
-	    if (m <= 2){ y -= 1; m += 12; }
-		
-			return (367 * y) - ((7 * (y + ((m + 9) / 12.0))) / 4.0)
-				 + ((275 * m) / 9.0) + d + 1721014;
-
-		}*/
-	
-	
 	private static double GregorianToJulianDay(int y, int m, int d) {
 
-	    if (m <= 2){ y -= 1; m += 12; }
+	    if (m <= 2){
+	    	y -= 1; m += 12;
+	    }
 
-			int A, B;
-			double JD;
+		int A, B;
+		double JD;
 
-			A = (int)(y / 100.0);
-			B = 2 - A + (int)(A / 4.0);
-			JD = (365.25 * (y + 4716)) + (30.6001 * (m + 1)) + d + B - 1524.5;	
+		A = (int)(y / 100.0);
+		B = 2 - A + (int)(A / 4.0);
+		JD = (365.25 * (y + 4716)) + (30.6001 * (m + 1)) + d + B - 1524.5;	
 
-			return JD;
-
-	}
-
-	public double HijriToJulianDay(int Y, int M, int D){
-
-		return (int)((11 * Y + 3) / 30.0) + (354 * Y) + (30 * M) -
-			   (int)((M - 1) / 2.0) + D + 1948440 - 385;
+		return JD;
 
 	}
 		
-	public int[] JulianDayToHijri(double JD){
-		int L, N, J, Y, M, D;
-
-			L = (int)(JD - 1948440 + 10632);
-			N = (int)((L - 1) / 10631.0);
-			L = L - (10631 * N) + 354;
-			J = (int)((10985 - L) / 5316.0) * (int)((50 * L) / 17719.0) + 
-				 (int)(L / 5670.0) * (int)((43 * L) / 15238.0);
-			
-			L = L - (int)((30 - J) / 15.0) * (int)((17719 * J) / 50.0) - 
-					  (int)(J / 16.0) * (int)((15238 * J) / 43.0) + 29;
-
-			M = (int)((24 * L) / 709.0); // Month
-			D = L - (int)((709 * M) / 24.0); // Day
-			Y = (30 * N) + J - 30; // Year
-
-			int HijriDate[] = new int[3];
-				
-			HijriDate[0] = Y;
-			HijriDate[1] = M;
-			HijriDate[2] = D;
-
-		return HijriDate;
-
-	}
-
-	public int[] JulianDayToGregorian(double JD){
-		int L, N, J, I, Y, M, D;
-			
-			L = (int)(JD + 68569);
-			N = (int)((4 * L) / 146097.0);
-			L = L - (int)((146097 * N + 3) / 4.0);
-			I = (int)((4000 * (L + 1)) / 1461001.0);
-			L = L - (int)((1461 * I) / 4.0) + 31;
-			J = (int)((80 * L) / 2447.0);
-			D = L - (int)((2447 * J) / 80.0); // Day
-			L = (int)(J / 11.0);
-			M = J + 2 - (12 * L); // Month
-			Y = 100 * (N - 49) + I + L; // Year
-
-			int GregorianDate[] = new int[3];
-
-			GregorianDate[0] = Y;
-			GregorianDate[1] = M;
-			GregorianDate[2] = D;
-
-		return GregorianDate;
-
-	}
-	
-	public static String dayOfTheWeek(int y, int m, int d){
-		int i = (14 - m) / 12;
-		y -= i;
-		int day = ((((i * 12 + m - 2) * 13 - 1) / 5) + d + y + (y / 4) - (y / 100) + (y / 400)) % 7;
-	    switch (day){
-		    case 0: 
-		      return "Sunday";
-		    case 1: 
-		      return "Monday";
-		    case 2: 
-		      return "Tuesday";
-		    case 3: 
-		      return "Wednesday";
-		    case 4: 
-		      return "Thursday";
-		    case 5: 
-		      return "Friday";
-	    }
-	    return "Saturday";
-	}
-	
-	public String getDayOfTheWeek(){
-	    return dayOfTheWeek(this.y, this.m, this.d);
-	}
-	
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 	public static String convertToMilitaryTime(String time){
@@ -805,7 +620,6 @@ public class PrayerTimes{
 		return   "Name : "				+ getName()			 +
 				 "\nHijri Date : " 		+ getHijriDate()	 +
 				 "\nGregorian Date : "  + getGregorianDate() +
-				 "\nDay of the week : " + getDayOfTheWeek()  +
 				 "\n\nFajr :    "		+ getFajr()			 +
 				 "\nShrouq :  " 		+ getShrouq()		 + 
 				 "\nDhuhr :   " 		+ getDhuhr()		 +
