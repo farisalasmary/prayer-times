@@ -19,6 +19,18 @@ import java.util.Calendar;
 
 public class PrayerTimes{
 
+    public static final int ASR_IN_SHAFAI = 1;
+    public static final int ASR_IN_HANAFI = 2;
+    	
+    public static final int UMM_AL_QURA_SETTINGS = 1;
+	public static final int MUSLIM_WORLD_LEAGUE_SETTINGS = 2;
+    public static final int ISNA_SETTINGS = 3;
+	public static final int EGYPTIAN_GENERAL_AUTHORITY_OF_SURVEY_SETTINGS = 4;
+    public static final int UNIVERSITY_OF_ISLAMIC_SCIENCES_SETTINGS = 5;
+    public static final int UNION_OF_ISLAMIC_ORGANIZATIONS_IN_FRANCE = 6;
+
+///////////////////////////////////////////////////////////////////////////////////////////
+
 	private boolean isUAQS; // is Umm AlQura settings ?
 	private String Name;
 	private double Latitude;
@@ -87,10 +99,10 @@ public class PrayerTimes{
 		this.setGMT(GMT);
 		this.RefLong = this.GMT * 15;
 		this.SolarCoordinates();
-		this.UmmAlQuraSettings();
-		this.AsrInShafai();
+		this.setAnglesSettings(UMM_AL_QURA_SETTINGS);
+		this.setAsrConfig(ASR_IN_SHAFAI);
+		
 	}
-
 
 	public GregorianDate getGregorianDate(){ 
 		return new GregorianDate(this.gregorianDate);
@@ -195,12 +207,6 @@ public class PrayerTimes{
 		
 	}
 	
-	// THINGS MUST BE IN UPDATE:
-	/*
-	 * 		SolarCoordinates(this.y, this.m, this.d);
-	 *      Update hijri if gregorian changed and vice versa
-	 * */
-	
 	public void setGregorianDate(GregorianDate gregorianDate){
 		if(gregorianDate == null)
 			throw new NullPointerException("No date found!");
@@ -215,48 +221,49 @@ public class PrayerTimes{
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-	public void UmmAlQuraSettings(){
-		this.FajrAngle = 18.5;
-		isUAQS = true;
-	}
+    public void setAnglesSettings(int option){
+        
+        if(option == UMM_AL_QURA_SETTINGS){
+            this.FajrAngle = 18.5;
+		    isUAQS = true;
+		    
+        }else if(option == MUSLIM_WORLD_LEAGUE_SETTINGS){
+            this.FajrAngle = 18;
+		    this.IshaAngle = 17;
+		    isUAQS = false;
+		    
+        }else if(option == ISNA_SETTINGS){
+            this.FajrAngle = 15;
+		    this.IshaAngle = 15;
+		    isUAQS = false;
+		    
+        }else if(option == EGYPTIAN_GENERAL_AUTHORITY_OF_SURVEY_SETTINGS){
+            this.FajrAngle = 19.5;
+		    this.IshaAngle = 17.5;
+		    isUAQS = false;
+		    
+        }else if(option == UNIVERSITY_OF_ISLAMIC_SCIENCES_SETTINGS){
+            this.FajrAngle = 18;
+		    this.IshaAngle = 18;
+		    isUAQS = false;
+		    
+        }else if(option == UNION_OF_ISLAMIC_ORGANIZATIONS_IN_FRANCE){
+            this.FajrAngle = 12;
+		    this.IshaAngle = 12;
+		    isUAQS = false;
+		    
+        }else{
+            throw new IllegalArgumentException("Invalid option!!"); 
+        }
+    }
 
-	public void MuslimWorldLeagueSettings(){
-		this.FajrAngle = 18;
-		this.IshaAngle = 17;
-		isUAQS = false;
-	} 
+    public void setAsrConfig(int option){
+        if(option != ASR_IN_SHAFAI && option != ASR_IN_HANAFI)
+            throw new IllegalArgumentException("Invalid option!!");
+        
+        this.AsrL = option;
+    }
 
-	public void ISNA_Settings(){
-		this.FajrAngle = 15;
-		this.IshaAngle = 15;
-		isUAQS = false;
-	} 
-
-	public void EgyptianGeneralAuthorityOfSurveySettings(){
-		this.FajrAngle = 19.5;
-		this.IshaAngle = 17.5;
-		isUAQS = false;
-	} 
-
-	public void UniversityOfIslamicSciencesSettings(){
-		this.FajrAngle = 18;
-		this.IshaAngle = 18;
-		isUAQS = false;
-	}
-
-	public void UnionOfIslamicOrganizationsInFrance(){
-		this.FajrAngle = 12;
-		this.IshaAngle = 12;
-		isUAQS = false;
-	} 
-
-	public void AsrInHanafi(){
-		this.AsrL = 2;
-	}
-
-	public void AsrInShafai(){
-		this.AsrL = 1;
-	}
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 	private double Fajr()	{ return (Dhuhr() - T(this.FajrAngle)); }
@@ -265,7 +272,7 @@ public class PrayerTimes{
 	private double Asr()	{ return (Dhuhr()+ A(AsrL)); }
 	private double Maghrib(){ return (Dhuhr() + T(0.83333)); }
 	private double Isha()	{ 
-		if(isUAQS) return Maghrib(); // return "Maghrib()" and add 90 mins (or 120 in Ramadan) to it for UmmAlQuraSettings
+		if(isUAQS) return Maghrib(); // return "Maghrib()" and add 90 mins (or 120 in Ramadan) to it for UMM_AL_QURA_SETTINGS
 		else 	   return (Dhuhr() + T(this.IshaAngle)); // use the angle for the others
 	}
 
@@ -595,14 +602,6 @@ public class PrayerTimes{
 
 		if(p == null)
 			throw new NullPointerException();
-
-	/*	int myPrayerTimes[][] = getPrayerTimes();
-		int pPrayerTimes[][]  = p.getPrayerTimes();
-		
-		for(int i = 0; i < myPrayerTimes.length; i++)
-			for(int j = 0; j < myPrayerTimes[0].length; j++)
-				if(myPrayerTimes[i][j] != pPrayerTimes[i][j])
-					return false;*/
 		
 		String thisPrayers[] = this.getPrayerTimes();
 		String pPrayers[] 	 = p.getPrayerTimes();
