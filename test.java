@@ -22,8 +22,14 @@ public class test {
 		    System.out.println("No, It is NOT!");
 		}
 		
+		if(PrayerTimes.isBetween(time, PrayerTimes.addMinutes(04031, 10), PrayerTimes.addMinutes("04:03 AM", 20))){
+		    System.out.println("Yes, It is!");
+		}else{
+		    System.out.println("No, It is NOT!");
+		}
+		
 		System.out.println("\nGetting ALL prayer times as an array and printing them\n");
-		String prayers[] = p.getPrayerTimes();
+		int prayers[] = p.getPrayerTimes();
 		for(int i = 0; i < prayers.length; i++)
 		    System.out.println(prayers[i]);
 		

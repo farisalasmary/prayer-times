@@ -112,27 +112,27 @@ public class PrayerTimes{
 		return new HijriDate(this.hijriDate);
 	}
 	
-	public String getFajr(){
+	public int getFajr(){
 		return FormatHours(Fajr());
 	}
 	
-	public String getShrouq(){
+	public int getShrouq(){
 		return FormatHours(Shrouq());
 	}
 	
-	public String getDhuhr(){
+	public int getDhuhr(){
 		return FormatHours(Dhuhr());
 	}
 	
-	public String getAsr(){
+	public int getAsr(){
 		return FormatHours(Asr());
 	}
 	
-	public String getMaghrib(){
+	public int getMaghrib(){
 		return FormatHours(Maghrib());
 	}
 
-	public String getIsha(){
+	public int getIsha(){
 		if(isUAQS)
 			return FormatHoursForUAQS(Isha());
 		else
@@ -155,8 +155,18 @@ public class PrayerTimes{
 		return this.GMT;
 	}
 	
-	public String[] getPrayerTimes(){
-		String prayers[] = new String[6];
+	public static String formatTime(int formatted){
+	    int hour   = formatted / 1000;
+        formatted  = formatted % 1000;
+        int min  = (formatted) / 10;
+        formatted  = formatted % 10;
+        boolean isPM = formatted == 1;
+        
+        return String.format("%02d:%02d ", hour, min) + (isPM ? "PM" : "AM");
+	}
+	
+	public int[] getPrayerTimes(){
+		int prayers[] = new int[6];
 		
 		prayers[0] = getFajr();
 		prayers[1] = getShrouq();
@@ -273,7 +283,7 @@ public class PrayerTimes{
 	private double Maghrib(){ return (Dhuhr() + T(0.83333)); }
 	private double Isha()	{ 
 		if(isUAQS) return Maghrib(); // return "Maghrib()" and add 90 mins (or 120 in Ramadan) to it for UMM_AL_QURA_SETTINGS
-		else 	   return (Dhuhr() + T(this.IshaAngle)); // use the angle for the others
+		else 	   return (Dhuhr() + T(this.IshaAngle)); // use the angle for others
 	}
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -324,7 +334,7 @@ public class PrayerTimes{
 	
 
 ///////////////////////////////////////////////////////////////////////////////////////////
-
+/*
 	private String FormatHours(double hrs) {
 		int hour = (int)hrs;
 		//int min = (int)Math.floor((hrs - hour) * 60);
@@ -408,7 +418,90 @@ public class PrayerTimes{
     return a;
 
 	}
+*/
 
+	private int FormatHours(double hrs) {
+		int hour = (int)hrs;
+		//int min = (int)Math.floor((hrs - hour) * 60);
+		int min = roundToMinute((hrs - hour) * 60);
+
+		while(min >= 60){
+			hour++;
+			min -= 60;
+		}
+		
+		boolean isPM = false;
+		// if the number of hours is greater than 12 such as 20 that means this is 
+		// after noon and we have to subtract 12 from the total number of hours to
+		// get the time in "AM PM" format.
+		if(hour > 12){ 
+			hour -= 12;
+			isPM = true;
+		}else if(hour == 12){
+			isPM = true;
+		}			
+        
+        return hour * 1000 + min * 10 + (isPM? 1:0);
+	}
+
+	private int FormatHoursForUAQS(double hrs) {
+		
+		// all methods for "Isha" are to add 90 mins to "Maghrib" time to get "Isha" time according to
+		// Umm-AlQura Settings
+		
+		int hour = (int)hrs;
+  		//int min = (int)Math.floor((hrs - hour) * 60);
+		int min = roundToMinute((hrs - hour) * 60);
+		
+		// if it is Ramadan
+		if(this.hijriDate.getMonth() != 9) 
+			min += 90; // this line which I'm talking about
+		else
+			min += 120;
+
+		while(min >= 60){
+			hour++;
+			min -= 60;
+		}
+		
+		boolean isPM = false;
+		// if the number of hours is greater than 12 such as 20 that means this is 
+		// after noon and we have to subtract 12 from the total number of hours to
+		// get the time in "AM PM" format.
+		if(hour > 12){ 
+			hour -= 12;
+			isPM = true;
+		}else if(hour == 12){
+			isPM = true;
+		}			
+        
+		return hour * 1000 + min * 10 + (isPM? 1:0);
+
+	}
+
+	private double fixhour(double a) {
+
+		while(a > 24)
+			a -= 24;
+
+		if(a < 0)
+			a += 24;
+
+    return a;
+
+	}
+
+	private double fixangle(double a) {
+		
+		while(a > 360)
+			a -= 360;
+
+		if(a < 0)
+			a += 360;
+
+    return a;
+
+	}
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 	private void SolarCoordinates(){
@@ -492,6 +585,10 @@ public class PrayerTimes{
 				
 
 		return false; // otherwise return false
+	}
+		
+	public static String addMinutes(int time, int minutes){
+		return addMinutes(formatTime(time), minutes);
 	}
 	
 	public static String addMinutes(String time, int minutes){
@@ -603,11 +700,11 @@ public class PrayerTimes{
 		if(p == null)
 			throw new NullPointerException();
 		
-		String thisPrayers[] = this.getPrayerTimes();
-		String pPrayers[] 	 = p.getPrayerTimes();
+		int thisPrayers[] = this.getPrayerTimes();
+		int pPrayers[] 	 = p.getPrayerTimes();
 		
 		for(int i = 0; i < thisPrayers.length; i++)
-			if(!thisPrayers[i].equalsIgnoreCase(pPrayers[i]))
+			if(thisPrayers[i] != pPrayers[i])
 				return false;
 					
 		return true;
@@ -616,15 +713,15 @@ public class PrayerTimes{
 
 	public String toString(){
 	
-		return   "Name : "				+ getName()			 +
-				 "\nHijri Date : " 		+ getHijriDate()	 +
-				 "\nGregorian Date : "  + getGregorianDate() +
-				 "\n\nFajr :    "		+ getFajr()			 +
-				 "\nShrouq :  " 		+ getShrouq()		 + 
-				 "\nDhuhr :   " 		+ getDhuhr()		 +
-				 "\nAsr :     " 		+ getAsr()			 + 
-				 "\nMaghrib : " 		+ getMaghrib()		 + 
-				 "\nIsha :    " 		+ getIsha();
+		return   "Name : "				+ getName()			                     +
+				 "\nHijri Date : " 		+ getHijriDate()	                     +
+				 "\nGregorian Date : "  + getGregorianDate()                     +
+				 "\n\nFajr :    "		+ formatTime(getFajr())			 +
+				 "\nShrouq :  " 		+ formatTime(getShrouq())		     + 
+				 "\nDhuhr :   " 		+ formatTime(getDhuhr())		     +
+				 "\nAsr :     " 		+ formatTime(getAsr())			 + 
+				 "\nMaghrib : " 		+ formatTime(getMaghrib())		 + 
+				 "\nIsha :    " 		+ formatTime(getIsha());
 	
 	}
 
