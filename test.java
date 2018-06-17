@@ -10,6 +10,7 @@ public class test {
 		
 		PrayerTimes p = new PrayerTimes(Latitude, Longitude, GMT, citryName);
 
+        p = new PrayerTimes(p); // construct new object using the data from the previous one
 
         // check if a given time is between a specific interval
 		String time = "04:15 AM";
@@ -30,8 +31,14 @@ public class test {
 		
 		System.out.println("\nGetting ALL prayer times as an array and printing them\n");
 		int prayers[] = p.getPrayerTimes();
+		
+		System.out.println("Unformatted form");
 		for(int i = 0; i < prayers.length; i++)
 		    System.out.println(prayers[i]);
+		
+		System.out.println("\nFormatted form");
+		for(int i = 0; i < prayers.length; i++)
+		    System.out.println(PrayerTimes.formatTime(prayers[i]));
 		
 		System.out.println("\nPrinting the content returned from the toString() method\n");
 	    System.out.println(p);  // print the toString() method of the class

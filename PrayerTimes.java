@@ -73,6 +73,7 @@ public class PrayerTimes{
 
 	 // copy constructor
 	public PrayerTimes(PrayerTimes p){
+	    this.Name          = p.Name;
 		this.isUAQS        = p.isUAQS ;
 		this.Latitude      = p.Latitude;
 		this.Longitude     = p.Longitude;
@@ -83,8 +84,8 @@ public class PrayerTimes{
 		this.IshaAngle     = p.IshaAngle;
 	 	this.AsrL          = p.AsrL;
 	 	this.GMT           = p.GMT;
-	 	this.hijriDate     = p.hijriDate;
-	 	this.gregorianDate = p.gregorianDate;
+	 	this.hijriDate     = new HijriDate(p.hijriDate);
+	 	this.gregorianDate = new GregorianDate(p.gregorianDate);
 
 	}
 
@@ -445,7 +446,6 @@ public class PrayerTimes{
 	}
 
 	private int FormatHoursForUAQS(double hrs) {
-		
 		// all methods for "Isha" are to add 90 mins to "Maghrib" time to get "Isha" time according to
 		// Umm-AlQura Settings
 		
@@ -480,26 +480,24 @@ public class PrayerTimes{
 	}
 
 	private double fixhour(double a) {
-
 		while(a > 24)
 			a -= 24;
 
 		if(a < 0)
 			a += 24;
 
-    return a;
+        return a;
 
 	}
 
 	private double fixangle(double a) {
-		
 		while(a > 360)
 			a -= 360;
 
 		if(a < 0)
 			a += 360;
 
-    return a;
+        return a;
 
 	}
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -696,12 +694,11 @@ public class PrayerTimes{
 ///////////////////////////////////////////////////////////////////////////////////////////
 	
 	public boolean equals(PrayerTimes p){
-
 		if(p == null)
 			throw new NullPointerException();
 		
 		int thisPrayers[] = this.getPrayerTimes();
-		int pPrayers[] 	 = p.getPrayerTimes();
+		int pPrayers[] 	  = p.getPrayerTimes();
 		
 		for(int i = 0; i < thisPrayers.length; i++)
 			if(thisPrayers[i] != pPrayers[i])
@@ -713,14 +710,14 @@ public class PrayerTimes{
 
 	public String toString(){
 	
-		return   "Name : "				+ getName()			                     +
-				 "\nHijri Date : " 		+ getHijriDate()	                     +
-				 "\nGregorian Date : "  + getGregorianDate()                     +
-				 "\n\nFajr :    "		+ formatTime(getFajr())			 +
-				 "\nShrouq :  " 		+ formatTime(getShrouq())		     + 
-				 "\nDhuhr :   " 		+ formatTime(getDhuhr())		     +
-				 "\nAsr :     " 		+ formatTime(getAsr())			 + 
-				 "\nMaghrib : " 		+ formatTime(getMaghrib())		 + 
+		return   "Name : "				+ getName()			        +
+				 "\nHijri Date : " 		+ getHijriDate()	        +
+				 "\nGregorian Date : "  + getGregorianDate()        +
+				 "\n\nFajr :    "		+ formatTime(getFajr())		+
+				 "\nShrouq :  " 		+ formatTime(getShrouq())	+ 
+				 "\nDhuhr :   " 		+ formatTime(getDhuhr())	+
+				 "\nAsr :     " 		+ formatTime(getAsr())		+ 
+				 "\nMaghrib : " 		+ formatTime(getMaghrib())	+ 
 				 "\nIsha :    " 		+ formatTime(getIsha());
 	
 	}
